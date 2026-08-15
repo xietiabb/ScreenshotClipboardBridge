@@ -96,6 +96,45 @@ public static class IconHelper
         bmp.UnlockBits(data);
         return bmp;
     }
+
+    /// <summary>
+    /// 裁剪到内容包围盒（去掉去白后四周残留的透明空白），让图标主体尽量占满画布，
+    /// 减小后续缩放时透明区与主体的混合面积。
+    /// </summary>
+    public static Bitmap CropToContent(Bitmap src)
+    {
+        int w = src.Width, h = src.Height;
+        var rect = new Rectangle(0, 0, w, h);
+        var data = src.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+        int stride = data.Stride;
+        var bytes = new byte[stride * h];
+        Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+
+        int minX = int.MaxValue, minY = int.MaxValue, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                if (bytes[y * stride + x * 4 + 3] > 10)
+                {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        src.UnlockBits(data);
+
+        if (maxX < minX) return src; // 全透明，原样返回
+
+        int pad = 2; // 留 2px 安全边距
+        minX = Math.Max(0, minX - pad);
+        minY = Math.Max(0, minY - pad);
+        maxX = Math.Min(w - 1, maxX + pad);
+        maxY = Math.Min(h - 1, maxY + pad);
+        return src.Clone(new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1), PixelFormat.Format32bppArgb);
+    }
 }
 "@ -ReferencedAssemblies System.Drawing
 
@@ -107,6 +146,9 @@ Write-Host "处理 $PngPath (阈值=$WhiteThreshold) ..."
 $src = [System.Drawing.Image]::FromFile($PngPath)
 $clean = [IconHelper]::RemoveWhiteEdge((New-Object System.Drawing.Bitmap($src)), $WhiteThreshold)
 $src.Dispose()
+# 裁剪内容包围盒：去掉四周空白，主体占满画布
+$crop = [IconHelper]::CropToContent($clean)
+$clean.Dispose()
 
 $sizes = @(16, 24, 32, 48, 64, 128, 256)
 $images = @()   # 每个元素: @(尺寸, PNG字节)
@@ -120,16 +162,22 @@ try {
             $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
             $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
             $g.Clear([System.Drawing.Color]::Transparent)
-            $g.DrawImage($clean, 0, 0, $s, $s)
+            $g.DrawImage($crop, 0, 0, $s, $s)
             $g.Dispose()
 
+            # 关键：小尺寸缩放会与透明区混合产生「半透明白边光晕」，
+            # 对每个尺寸再跑一次去白，把缩放产生的浅色边缘清掉。
+            $final = [IconHelper]::RemoveWhiteEdge($bmp, 240)
+            $bmp.Dispose()
+
             $ms = New-Object System.IO.MemoryStream
-            $bmp.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+            $final.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
             $images += , @($s, $ms.ToArray())
             $ms.Dispose()
-        } finally { $bmp.Dispose() }
+            $final.Dispose()
+        } finally { if (-not $bmp.IsDisposed) { $bmp.Dispose() } }
     }
-} finally { $clean.Dispose() }
+} finally { $crop.Dispose() }
 
 # ---- 手工组装 ICO 文件（ICONDIR + ICONDIRENTRY[] + 图像数据）----
 $count = $images.Count
