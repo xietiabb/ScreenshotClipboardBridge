@@ -14,6 +14,11 @@ internal static class TrayIcons
     /// <summary>嵌入资源的逻辑名称（与 csproj 的 LogicalName 一致）。</summary>
     private const string EmbeddedIconName = "ScreenshotClipboardBridge.assets.app.ico";
 
+    /// <summary>进程级共享图标实例（托盘、设置窗口、路径对话框共用，避免重复创建）。</summary>
+    private static Icon? _sharedIcon;
+
+    public static Icon Shared => _sharedIcon ??= Create();
+
     /// <summary>创建托盘图标（进程生命周期内持有即可，无需频繁重建）。</summary>
     public static Icon Create()
     {

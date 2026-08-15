@@ -41,6 +41,7 @@ public sealed class SettingsForm : Form
 
         Text = "Screenshot Clipboard Bridge - 设置";
         Font = new Font("Microsoft YaHei UI", 9F);
+        Icon = TrayIcons.Shared; // 窗口标题栏/任务栏窗口图标与应用图标一致
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;

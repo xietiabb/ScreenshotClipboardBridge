@@ -128,7 +128,8 @@ public static class IconHelper
 
         if (maxX < minX) return src; // 全透明，原样返回
 
-        int pad = 2; // 留 2px 安全边距
+        // 保留主体周边约 8% 的透明边距：避免主体贴边（深色模式下贴边会显得有一圈边）
+        int pad = Math.Max(4, (int)(Math.Min(w, h) * 0.08));
         minX = Math.Max(0, minX - pad);
         minY = Math.Max(0, minY - pad);
         maxX = Math.Min(w - 1, maxX + pad);

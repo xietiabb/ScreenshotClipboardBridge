@@ -33,6 +33,7 @@ public sealed class PathDialog : Form
 
         Text = "最近截图路径";
         Font = new Font("Microsoft YaHei UI", 9F);
+        Icon = TrayIcons.Shared; // 窗口标题栏/任务栏窗口图标与应用图标一致
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
