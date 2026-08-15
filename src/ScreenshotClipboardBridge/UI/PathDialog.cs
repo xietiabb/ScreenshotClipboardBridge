@@ -56,10 +56,10 @@ public sealed class PathDialog : Form
         };
 
         // ---- 第 3 行：按钮（右下角，从右往左排列）
-        // AutoSize=true：按钮宽度随文字自动撑开，任何 DPI 缩放下都不会截断文字。
-        _copyBtn = new Button { Text = "复制路径", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
-        _openBtn = new Button { Text = "打开文件夹", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
-        _closeBtn = new Button { Text = "关闭", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
+        // 按钮只保留 AutoSize：宽高完全由文字决定，任何 DPI/字体下都不会挤压截断。
+        _copyBtn = new Button { Text = "复制路径", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+        _openBtn = new Button { Text = "打开文件夹", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+        _closeBtn = new Button { Text = "关闭", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
         var buttons = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
