@@ -131,18 +131,11 @@ public sealed class SettingsForm : Form
         storage.Controls.Add(storageLayout);
         Controls.Add(storage);
 
-        // ---- 底部按钮：固定贴住窗口底部边线（不依赖 Storage 的 AutoSize 布局时机）----
-        var bottom = new FlowLayoutPanel
-        {
-            FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(margin, ClientSize.Height - 34 - 8),
-            Width = ClientSize.Width - margin * 2,
-            Height = 34,
-            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-        };
-        bottom.Controls.Add(_saveBtn);
-        bottom.Controls.Add(_cancelBtn);
-        Controls.Add(bottom);
+        // ---- 底部按钮：直接放在窗体上（不用容器，避免 AutoSize 按钮被容器裁剪、下边框丢失）----
+        // 在 Shown（布局完成、按钮尺寸确定）后精确定位：紧挨成一组、完整显示边框、贴底 12px。
+        Controls.Add(_saveBtn);
+        Controls.Add(_cancelBtn);
+        Shown += (_, _) => PositionBottomButtons();
 
         // ---- 路径 ToolTip：目录较长显示不全时，鼠标悬停查看完整路径 ----
         _dirBox.TextChanged += (_, _) => _tooltip.SetToolTip(_dirBox, _dirBox.Text);
@@ -176,6 +169,21 @@ public sealed class SettingsForm : Form
             .Cast<RetentionItem>()
             .FirstOrDefault(i => i.Days == config.RetentionDays);
         _retentionBox.SelectedItem = selected ?? (RetentionItem)_retentionBox.Items[2]!; // 默认 7 天
+
+        // 布局完成后定位底部按钮
+        PositionBottomButtons();
+    }
+
+    /// <summary>
+    /// 底部「取消/保存」精确定位：紧挨成一组、贴窗口底边 12px、边框完整显示。
+    /// 必须在布局完成（Shown / 文本填充）后调用，此时 AutoSize 按钮尺寸才是最终值。
+    /// </summary>
+    private void PositionBottomButtons()
+    {
+        int height = Math.Max(_saveBtn.Height, _cancelBtn.Height);
+        int y = ClientSize.Height - height - 12;
+        _saveBtn.Location = new Point(ClientSize.Width - 16 - _saveBtn.Width, y);
+        _cancelBtn.Location = new Point(_saveBtn.Left - 8 - _cancelBtn.Width, y);
     }
 
     /// <summary>选择目录：弹 FolderBrowserDialog 并回填路径。</summary>
