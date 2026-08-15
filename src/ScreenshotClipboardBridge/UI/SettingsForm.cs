@@ -44,7 +44,7 @@ public sealed class SettingsForm : Form
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
         AutoSize = false;
-        ClientSize = new Size(500, 330);
+        ClientSize = new Size(600, 400);
 
         BuildLayout();
         LoadConfig(config);
@@ -57,29 +57,29 @@ public sealed class SettingsForm : Form
     /// </summary>
     private void BuildLayout()
     {
-        const int margin = 12;
+        const int margin = 16;
         int width = ClientSize.Width - margin * 2;
 
-        // ---- General 分组 ----
-        var general = new GroupBox { Text = "General", Bounds = new Rectangle(margin, margin, width, 112), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
-        _enabledCheck.Location = new Point(20, 30);
-        _startupCheck.Location = new Point(20, 58);
-        _notificationCheck.Location = new Point(20, 86);
+        // ---- General 分组（行距 34px，宽松）----
+        var general = new GroupBox { Text = "General", Bounds = new Rectangle(margin, margin, width, 132), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        _enabledCheck.Location = new Point(24, 36);
+        _startupCheck.Location = new Point(24, 70);
+        _notificationCheck.Location = new Point(24, 104);
         general.Controls.Add(_enabledCheck);
         general.Controls.Add(_startupCheck);
         general.Controls.Add(_notificationCheck);
         Controls.Add(general);
 
         // ---- Storage 分组 ----
-        int storageY = margin + 112 + 8;
-        var storage = new GroupBox { Text = "Storage", Bounds = new Rectangle(margin, storageY, width, 152), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
-        var dirLabel = new Label { Text = "截图目录:", AutoSize = true, Location = new Point(20, 31) };
-        _dirBox.Bounds = new Rectangle(110, 27, 200, 25);
+        int storageY = margin + 132 + 12;
+        var storage = new GroupBox { Text = "Storage", Bounds = new Rectangle(margin, storageY, width, 176), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        var dirLabel = new Label { Text = "截图目录:", AutoSize = true, Location = new Point(24, 37) };
+        _dirBox.Bounds = new Rectangle(120, 32, 330, 25);
         _dirBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        _browseBtn.Location = new Point(324, 25); // AutoSize，不设 Anchor，宽度随文字
-        var retentionLabel = new Label { Text = "保存时间:", AutoSize = true, Location = new Point(20, 71) };
-        _retentionBox.Bounds = new Rectangle(110, 67, 160, 25);
-        _openDirBtn.Location = new Point(110, 107); // AutoSize
+        _browseBtn.Location = new Point(468, 30); // AutoSize，不设 Anchor，宽度随文字
+        var retentionLabel = new Label { Text = "保存时间:", AutoSize = true, Location = new Point(24, 83) };
+        _retentionBox.Bounds = new Rectangle(120, 79, 180, 25);
+        _openDirBtn.Location = new Point(120, 123); // AutoSize
         storage.Controls.Add(dirLabel);
         storage.Controls.Add(_dirBox);
         storage.Controls.Add(_browseBtn);
@@ -92,8 +92,8 @@ public sealed class SettingsForm : Form
         var bottom = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(margin, storageY + 152 + 10),
-            Size = new Size(width, 28),
+            Location = new Point(margin, storageY + 176 + 14),
+            Size = new Size(width, 30),
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
         };
         bottom.Controls.Add(_saveBtn);
@@ -121,6 +121,9 @@ public sealed class SettingsForm : Form
         _startupCheck.Checked = config.Startup;
         _notificationCheck.Checked = config.Notification;
         _dirBox.Text = App.AppPaths.ResolveSaveDirectory(config.SaveDirectory);
+        // 路径较长时默认显示末尾（文件名部分），方便查看。
+        _dirBox.SelectionStart = _dirBox.Text.Length;
+        _dirBox.ScrollToCaret();
 
         RetentionItem? selected = _retentionBox.Items
             .Cast<RetentionItem>()

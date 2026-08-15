@@ -13,8 +13,8 @@ namespace ScreenshotClipboardBridge.UI;
 /// </summary>
 public sealed class PathDialog : Form
 {
-    private const int DialogWidth = 560;
-    private const int Margin = 16;
+    private const int DialogWidth = 660;
+    private const int Margin = 20;
 
     private readonly string? _path;
     private readonly Action _openFolder;
@@ -38,20 +38,20 @@ public sealed class PathDialog : Form
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
         AutoSize = false;
-        ClientSize = new Size(DialogWidth, 152);
+        ClientSize = new Size(DialogWidth, 186);
 
         int contentWidth = DialogWidth - Margin * 2; // 内容区可用宽度
 
         // ---- 第 1 行：提示文字 ----
-        _hintLabel = new Label { AutoSize = true, Location = new Point(Margin, 14) };
+        _hintLabel = new Label { AutoSize = true, Location = new Point(Margin, 18) };
 
         // ---- 第 2 行：路径文本框（只读、可全选手动复制）----
         _pathBox = new TextBox
         {
             ReadOnly = true,
-            Location = new Point(Margin, 44),
+            Location = new Point(Margin, 52),
             Width = contentWidth,
-            Height = 26,
+            Height = 30,
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
         };
 
@@ -63,8 +63,8 @@ public sealed class PathDialog : Form
         var buttons = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(Margin, 100),
-            Size = new Size(contentWidth, 34),
+            Location = new Point(Margin, 120),
+            Size = new Size(contentWidth, 40),
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
         };
         buttons.Controls.Add(_closeBtn);
