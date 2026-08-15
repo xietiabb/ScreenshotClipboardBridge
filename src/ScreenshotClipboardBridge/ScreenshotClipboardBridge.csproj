@@ -22,6 +22,9 @@
     <!-- 高 DPI 支持（Per-Monitor V2，设置窗口在缩放屏上不模糊） -->
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
 
+    <!-- EXE 图标：assets/app.ico（多尺寸，见 scripts/make-icon.ps1） -->
+    <ApplicationIcon>assets\app.ico</ApplicationIcon>
+
     <!-- 版本与元数据 -->
     <Version>1.0.0</Version>
     <Product>Screenshot Clipboard Bridge</Product>
@@ -30,5 +33,12 @@
     <Authors>tian51</Authors>
     <RepositoryUrl>https://github.com/yourname/ScreenshotClipboardBridge</RepositoryUrl>
   </PropertyGroup>
+
+  <!-- 应用图标作为嵌入资源：单文件发布时托盘图标仍可加载 -->
+  <ItemGroup>
+    <EmbeddedResource Include="assets\app.ico">
+      <LogicalName>ScreenshotClipboardBridge.assets.app.ico</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>
