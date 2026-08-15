@@ -134,7 +134,7 @@ public sealed class SettingsForm : Form
         var bottom = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(margin, storage.Bottom + 14),
+            Location = new Point(margin, storage.Bottom + 2),
             Width = ClientSize.Width - margin * 2,
             Height = 34,
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
