@@ -55,10 +55,11 @@ public sealed class PathDialog : Form
             Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
         };
 
-        // ---- 第 3 行：按钮（右下角，从右往左排列）----
-        _copyBtn = new Button { Text = "复制路径", Width = 92, Height = 28 };
-        _openBtn = new Button { Text = "打开文件夹", Width = 100, Height = 28 };
-        _closeBtn = new Button { Text = "关闭", Width = 76, Height = 28 };
+        // ---- 第 3 行：按钮（右下角，从右往左排列）
+        // AutoSize=true：按钮宽度随文字自动撑开，任何 DPI 缩放下都不会截断文字。
+        _copyBtn = new Button { Text = "复制路径", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
+        _openBtn = new Button { Text = "打开文件夹", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
+        _closeBtn = new Button { Text = "关闭", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Height = 28 };
         var buttons = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,

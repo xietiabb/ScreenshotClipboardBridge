@@ -24,6 +24,7 @@ public sealed class TrayContext : ApplicationContext
     private readonly ClipboardImageHandler _handler;
     private readonly ScreenshotStore _store;
     private readonly RetentionService _retention;
+    private readonly RecentScreenshotStore _recentStore;
     private readonly ToastService _toast;
 
     private readonly NotifyIcon _tray;
@@ -44,6 +45,7 @@ public sealed class TrayContext : ApplicationContext
         ScreenshotStore store,
         ClipboardImageHandler handler,
         RetentionService retention,
+        RecentScreenshotStore recentStore,
         bool clipboardListenerActive)
     {
         _config = config;
@@ -51,6 +53,7 @@ public sealed class TrayContext : ApplicationContext
         _store = store;
         _handler = handler;
         _retention = retention;
+        _recentStore = recentStore;
 
         // 托盘图标（程序唯一常驻的可见元素）
         _tray = new NotifyIcon
@@ -167,7 +170,8 @@ public sealed class TrayContext : ApplicationContext
             App.AppLog.Write("process", $"尝试转换: converted={converted}, image={source.HasImage}, fileDrop={source.HasFileDrop}, text={source.HasText}, 路径={savedPath ?? "无"}");
             if (converted && savedPath is not null)
             {
-                // 转换成功：更新托盘提示 + 可选通知
+                // 转换成功：持久化最近记录（重启后对话框仍能取回）+ 更新托盘提示 + 可选通知
+                _recentStore.Save(new RecentScreenshotStore.Entry(savedPath, _handler.LastSavedAtUtc ?? DateTime.UtcNow));
                 string fileName = Path.GetFileName(savedPath);
                 _tray.Text = $"Screenshot Clipboard Bridge — {fileName}";
                 if (_config.Notification)

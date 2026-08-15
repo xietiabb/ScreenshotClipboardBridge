@@ -51,12 +51,21 @@ internal static class Program
         var handler = new ClipboardImageHandler(store, loopGuard, path => System.Windows.Forms.Clipboard.SetText(path)); // 图片 → 保存 → 路径写回
         var retention = new RetentionService(store, () => config.RetentionDays);           // 定期清理过期截图
 
+        // 「最近截图」持久化：程序重启后仍能记住上次截图（对话框/未来 MCP 依赖）。
+        var recentStore = new RecentScreenshotStore();
+        RecentScreenshotStore.Entry? recent = recentStore.Load();
+        if (recent is not null)
+        {
+            handler.RestoreLastSaved(recent.Path, recent.CreatedAtUtc);
+            AppLog.Write("startup", $"已恢复最近截图记录: {recent.Path}");
+        }
+
         // ---- 托盘常驻 ----
         // 剪贴板监听（AddClipboardFormatListener 原生事件，非轮询）。
         using var monitor = new ClipboardMonitor();
         bool listenerStarted = monitor.Start();
         AppLog.Write("startup", $"监听器注册: listenerStarted={listenerStarted}, 配置: enabled={config.Enabled}, notification={config.Notification}, retention={config.RetentionDays}");
-        using var trayContext = new TrayContext(config, configService, store, handler, retention, listenerStarted);
+        using var trayContext = new TrayContext(config, configService, store, handler, retention, recentStore, listenerStarted);
         monitor.ClipboardChanged += trayContext.OnClipboardChanged;
 
         // 主消息循环（ApplicationContext 模式：无主窗体，靠托盘图标存活）。

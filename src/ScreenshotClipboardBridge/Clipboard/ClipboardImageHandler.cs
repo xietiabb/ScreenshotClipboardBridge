@@ -24,6 +24,15 @@ public sealed class ClipboardImageHandler
     /// <summary>最近一次成功保存的时间（UTC）。</summary>
     public DateTime? LastSavedAtUtc { get; private set; }
 
+    /// <summary>
+    /// 程序启动时恢复「最近一次截图」记录（内存态，配合持久化存储跨重启保留）。
+    /// </summary>
+    public void RestoreLastSaved(string path, DateTime createdAtUtc)
+    {
+        LastSavedPath = path;
+        LastSavedAtUtc = createdAtUtc;
+    }
+
     public ClipboardImageHandler(ScreenshotStore store, LoopGuard guard, Action<string> writePathToClipboard)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));

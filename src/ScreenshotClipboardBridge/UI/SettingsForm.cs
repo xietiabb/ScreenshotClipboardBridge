@@ -15,11 +15,11 @@ public sealed class SettingsForm : Form
     private readonly CheckBox _startupCheck = new() { Text = "开机自动启动", Checked = false };
     private readonly CheckBox _notificationCheck = new() { Text = "转换成功通知", Checked = true };
     private readonly TextBox _dirBox = new() { ReadOnly = false };
-    private readonly Button _browseBtn = new() { Text = "选择目录..." };
-    private readonly Button _openDirBtn = new() { Text = "打开截图文件夹" };
+    private readonly Button _browseBtn = new() { Text = "选择目录...", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+    private readonly Button _openDirBtn = new() { Text = "打开截图文件夹", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
     private readonly ComboBox _retentionBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
-    private readonly Button _saveBtn = new() { Text = "保存", DialogResult = DialogResult.OK };
-    private readonly Button _cancelBtn = new() { Text = "取消", DialogResult = DialogResult.Cancel };
+    private readonly Button _saveBtn = new() { Text = "保存", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, DialogResult = DialogResult.OK };
+    private readonly Button _cancelBtn = new() { Text = "取消", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, DialogResult = DialogResult.Cancel };
 
     private readonly ScreenshotStore _store;
 
