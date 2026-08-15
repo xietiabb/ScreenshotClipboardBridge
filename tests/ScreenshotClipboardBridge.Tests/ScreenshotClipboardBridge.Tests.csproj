@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Screenshot Clipboard Bridge — 单元测试项目（xUnit）
+    目标框架与主项目一致（net8.0-windows10.0.19041.0），
+    便于直接引用主项目并测试 System.Drawing 相关逻辑。
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- 测试运行器（xunit.console）不引用 WindowsDesktop 共享框架，
+         需要显式引用 System.Drawing.Common 才能在独立运行器下使用 Bitmap。 -->
+    <PackageReference Include="System.Drawing.Common" Version="8.0.30" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ScreenshotClipboardBridge\ScreenshotClipboardBridge.csproj" />
+  </ItemGroup>
+
+</Project>

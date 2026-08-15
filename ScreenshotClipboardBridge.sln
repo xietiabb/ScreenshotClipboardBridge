@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0116C2C1-6815-4112-850F-7A81A8817739}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenshotClipboardBridge", "src\ScreenshotClipboardBridge\ScreenshotClipboardBridge.csproj", "{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0665FF73-5B7D-4C65-97AF-840CE7EBE537}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScreenshotClipboardBridge.Tests", "tests\ScreenshotClipboardBridge.Tests\ScreenshotClipboardBridge.Tests.csproj", "{909EF4CA-C01A-40E2-AA19-F78E694BC449}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{909EF4CA-C01A-40E2-AA19-F78E694BC449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{909EF4CA-C01A-40E2-AA19-F78E694BC449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{909EF4CA-C01A-40E2-AA19-F78E694BC449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{909EF4CA-C01A-40E2-AA19-F78E694BC449}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B29202C8-A3C3-4D8B-88C1-A0C52F51EA86} = {0116C2C1-6815-4112-850F-7A81A8817739}
+		{909EF4CA-C01A-40E2-AA19-F78E694BC449} = {0665FF73-5B7D-4C65-97AF-840CE7EBE537}
+	EndGlobalSection
+EndGlobal

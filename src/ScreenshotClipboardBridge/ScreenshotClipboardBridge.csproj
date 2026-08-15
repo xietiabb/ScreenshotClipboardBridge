@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Screenshot Clipboard Bridge — 项目文件
+    目标框架: net8.0-windows10.0.19041.0
+      - windows TFM: 启用 WinForms / System.Drawing / Registry 等 Windows 原生能力
+      - 10.0.19041.0: 解锁 Windows 10 2004+ 的 WinRT API（用于 Windows Toast 通知）
+    输出类型: WinExe —— 无控制台窗口，双击后静默常驻托盘
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- 程序集/命名空间标识 -->
+    <AssemblyName>ScreenshotClipboardBridge</AssemblyName>
+    <RootNamespace>ScreenshotClipboardBridge</RootNamespace>
+
+    <!-- 高 DPI 支持（Per-Monitor V2，设置窗口在缩放屏上不模糊） -->
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+
+    <!-- 版本与元数据 -->
+    <Version>1.0.0</Version>
+    <Product>Screenshot Clipboard Bridge</Product>
+    <Description>将剪贴板截图自动保存为本地 PNG 文件，并把文件路径写回剪贴板，供 AI 客户端/视觉 MCP 直接使用。</Description>
+    <Company></Company>
+    <Authors>tian51</Authors>
+    <RepositoryUrl>https://github.com/yourname/ScreenshotClipboardBridge</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>

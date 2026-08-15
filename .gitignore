@@ -1,0 +1,17 @@
+# 构建产物
+bin/
+obj/
+dist/
+
+# 本地 NuGet 离线缓存（由 scripts/fetch-nuget.mjs 生成，勿提交）
+tools/nuget-local/
+tools/nuget-packages/
+tools/dotnet-home/
+
+# Visual Studio / IDE
+.vs/
+*.user
+*.suo
+
+# 运行时日志
+*.log
