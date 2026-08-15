@@ -21,11 +21,20 @@ internal static class Program
     /// 主入口。必须标记 STAThread：Windows 剪贴板（Clipboard）与 WinForms 均要求 STA 线程。
     /// </summary>
     [STAThread]
-    private static void Main()
+    private static void Main(string[] args)
     {
         // WinForms 应用初始化（视觉样式、默认字体、DPI 等，.NET 6+ 自动生成）。
         ApplicationConfiguration.Initialize();
         AppLog.Write("startup", $"进程启动 pid={Environment.ProcessId}");
+
+        // 布局预览调试模式（开发用，不影响正常启动）：
+        //   --layout-preview [输出目录]
+        // 启动后自动渲染「设置窗口 + 最近截图路径对话框」并保存 PNG 截图，然后退出。
+        if (args.Contains("--layout-preview"))
+        {
+            RunLayoutPreview(args.Length > 1 ? args[1] : Path.Combine(AppPaths.RootDir, "layout-preview"));
+            return;
+        }
 
         // ---- 单实例保护：已运行时提示并退出，避免两个实例同时抢剪贴板 ----
         using var mutex = new Mutex(initiallyOwned: true, MutexName, out bool createdNew);
@@ -71,5 +80,71 @@ internal static class Program
         // 主消息循环（ApplicationContext 模式：无主窗体，靠托盘图标存活）。
         Application.Run(trayContext);
         AppLog.Write("exit", "程序退出");
+    }
+
+    /// <summary>
+    /// 布局预览：渲染设置窗口与最近截图路径对话框，保存为 PNG（开发调试用）。
+    /// </summary>
+    private static void RunLayoutPreview(string outputDir)
+    {
+        try
+        {
+            Directory.CreateDirectory(outputDir);
+            var config = new Config();
+            var store = new Core.ScreenshotStore(() => AppPaths.DefaultImageDir);
+
+            var settings = new UI.SettingsForm(config, store);
+            settings.Show();
+            var pathDialog = new UI.PathDialog(
+                @"C:\Users\tian51\AppData\Local\ScreenshotClipboardBridge\images\2026-08-15_15-20-28_48eb44.png",
+                () => { });
+            pathDialog.Show();
+
+            // 让窗口完成一次真实布局渲染
+            Application.DoEvents();
+            Thread.Sleep(800);
+            Application.DoEvents();
+
+            // 输出控件树诊断信息（Bounds / AutoSize / PreferredSize / Font）
+            DumpControls(settings, "设置窗口");
+            DumpControls(pathDialog, "最近路径对话框");
+
+            SaveWindowImage(settings, Path.Combine(outputDir, "layout-settings.png"));
+            SaveWindowImage(pathDialog, Path.Combine(outputDir, "layout-pathdialog.png"));
+
+            AppLog.Write("preview", $"布局预览已保存到 {outputDir}");
+            settings.Close();
+            pathDialog.Close();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Write("preview", $"布局预览失败: {ex}");
+        }
+    }
+
+    /// <summary>把窗口客户区渲染为 PNG。</summary>
+    private static void SaveWindowImage(System.Windows.Forms.Form form, string path)
+    {
+        using var bitmap = new System.Drawing.Bitmap(form.Width, form.Height);
+        form.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, form.Width, form.Height));
+        bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+    }
+
+    /// <summary>递归输出控件树诊断（布局问题定位用）。</summary>
+    private static void DumpControls(System.Windows.Forms.Form root, string title)
+    {
+        void Walk(System.Windows.Forms.Control parent, string indent)
+        {
+            foreach (System.Windows.Forms.Control c in parent.Controls)
+            {
+                AppLog.Write("preview",
+                    $"{title} | {indent}{c.GetType().Name} Text='{c.Text}' Bounds={c.Bounds} " +
+                    $"AutoSize={c.AutoSize} PreferredSize={c.PreferredSize} Font={c.Font.Name}/{c.Font.Size} DPI={c.DeviceDpi}");
+                Walk(c, indent + "  ");
+            }
+        }
+
+        AppLog.Write("preview", $"{title} | {root.GetType().Name} Bounds={root.Bounds} ClientSize={root.ClientSize} AutoScaleMode={root.AutoScaleMode} DPI={root.DeviceDpi}");
+        Walk(root, "  ");
     }
 }

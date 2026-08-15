@@ -15,3 +15,5 @@ tools/dotnet-home/
 
 # 运行时日志
 *.log
+
+tools/layout-preview/

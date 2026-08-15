@@ -11,9 +11,11 @@ namespace ScreenshotClipboardBridge.UI;
 /// </summary>
 public sealed class SettingsForm : Form
 {
-    private readonly CheckBox _enabledCheck = new() { Text = "自动转换截图", Checked = true };
-    private readonly CheckBox _startupCheck = new() { Text = "开机自动启动", Checked = false };
-    private readonly CheckBox _notificationCheck = new() { Text = "转换成功通知", Checked = true };
+    // 注意：CheckBox 在 .NET 8 里默认 AutoSize=False（宽度固定 104px），
+    // 高 DPI（125%/150%/175%）下文字会被截断，必须显式 AutoSize=true 让宽度随文字。
+    private readonly CheckBox _enabledCheck = new() { Text = "自动转换截图", Checked = true, AutoSize = true };
+    private readonly CheckBox _startupCheck = new() { Text = "开机自动启动", Checked = false, AutoSize = true };
+    private readonly CheckBox _notificationCheck = new() { Text = "转换成功通知", Checked = true, AutoSize = true };
     private readonly TextBox _dirBox = new() { ReadOnly = false };
     private readonly Button _browseBtn = new() { Text = "选择目录...", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
     private readonly Button _openDirBtn = new() { Text = "打开截图文件夹", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
@@ -44,56 +46,97 @@ public sealed class SettingsForm : Form
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
         AutoSize = false;
-        ClientSize = new Size(600, 400);
+        ClientSize = new Size(600, 430);
 
         BuildLayout();
         LoadConfig(config);
     }
 
     /// <summary>
-    /// 组装控件布局：固定窗口尺寸 + 纯手动坐标。
-    /// 不用 TableLayoutPanel/AutoSize 嵌套，按钮只保留 AutoSize（宽高随文字），
-    /// 从根上避免「文字被挤压/截断」。
+    /// 组装控件布局：全部使用「自适应尺寸」容器（AutoSize + FlowLayout/TableLayout）。
+    /// 容器按控件的实际 PreferredSize（已按当前 DPI 测量）自动决定尺寸，
+    /// 任何 DPI/字体缩放下都不会出现文字截断、控件重叠或边框被盖。
     /// </summary>
     private void BuildLayout()
     {
         const int margin = 16;
-        int width = ClientSize.Width - margin * 2;
 
-        // ---- General 分组（行距 34px，宽松）----
-        var general = new GroupBox { Text = "General", Bounds = new Rectangle(margin, margin, width, 132), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
-        _enabledCheck.Location = new Point(24, 36);
-        _startupCheck.Location = new Point(24, 70);
-        _notificationCheck.Location = new Point(24, 104);
-        general.Controls.Add(_enabledCheck);
-        general.Controls.Add(_startupCheck);
-        general.Controls.Add(_notificationCheck);
+        // ---- General：三个复选框纵向自动排列 ----
+        var general = new GroupBox
+        {
+            Text = "General",
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Location = new Point(margin, margin),
+            Padding = new Padding(12, 10, 12, 12),
+        };
+        var generalFlow = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        };
+        _enabledCheck.Margin = new Padding(0, 6, 0, 6);
+        _startupCheck.Margin = new Padding(0, 6, 0, 6);
+        _notificationCheck.Margin = new Padding(0, 6, 0, 6);
+        generalFlow.Controls.Add(_enabledCheck);
+        generalFlow.Controls.Add(_startupCheck);
+        generalFlow.Controls.Add(_notificationCheck);
+        general.Controls.Add(generalFlow);
         Controls.Add(general);
 
-        // ---- Storage 分组 ----
-        int storageY = margin + 132 + 12;
-        var storage = new GroupBox { Text = "Storage", Bounds = new Rectangle(margin, storageY, width, 176), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
-        var dirLabel = new Label { Text = "截图目录:", AutoSize = true, Location = new Point(24, 37) };
-        _dirBox.Bounds = new Rectangle(120, 32, 330, 25);
-        _dirBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        _browseBtn.Location = new Point(468, 30); // AutoSize，不设 Anchor，宽度随文字
-        var retentionLabel = new Label { Text = "保存时间:", AutoSize = true, Location = new Point(24, 83) };
-        _retentionBox.Bounds = new Rectangle(120, 79, 180, 25);
-        _openDirBtn.Location = new Point(120, 123); // AutoSize
-        storage.Controls.Add(dirLabel);
-        storage.Controls.Add(_dirBox);
-        storage.Controls.Add(_browseBtn);
-        storage.Controls.Add(retentionLabel);
-        storage.Controls.Add(_retentionBox);
-        storage.Controls.Add(_openDirBtn);
+        // ---- Storage：两行表格式自动布局 ----
+        int storageY = general.Bottom + 12;
+        var storage = new GroupBox
+        {
+            Text = "Storage",
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Location = new Point(margin, storageY),
+            Padding = new Padding(12, 10, 12, 12),
+        };
+        var storageLayout = new TableLayoutPanel
+        {
+            ColumnCount = 3,
+            RowCount = 3,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        };
+        storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+        var dirLabel = new Label { Text = "截图目录:", AutoSize = true, Margin = new Padding(0, 4, 10, 0) };
+        _dirBox.Dock = DockStyle.Fill;
+        _dirBox.Margin = new Padding(0, 2, 8, 10);
+        _browseBtn.Margin = new Padding(0, 0, 0, 10);
+        storageLayout.Controls.Add(dirLabel, 0, 0);
+        storageLayout.Controls.Add(_dirBox, 1, 0);
+        storageLayout.Controls.Add(_browseBtn, 2, 0);
+
+        var retentionLabel = new Label { Text = "保存时间:", AutoSize = true, Margin = new Padding(0, 4, 10, 0) };
+        _retentionBox.Dock = DockStyle.Fill;
+        _retentionBox.Margin = new Padding(0, 2, 8, 10);
+        storageLayout.Controls.Add(retentionLabel, 0, 1);
+        storageLayout.Controls.Add(_retentionBox, 1, 1);
+
+        _openDirBtn.Margin = new Padding(0, 0, 0, 0);
+        storageLayout.Controls.Add(_openDirBtn, 1, 2);
+        storageLayout.SetColumnSpan(_openDirBtn, 2);
+        storage.Controls.Add(storageLayout);
         Controls.Add(storage);
 
         // ---- 底部按钮（右下角，FlowLayoutPanel 动态布局 AutoSize 按钮）----
         var bottom = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(margin, storageY + 176 + 14),
-            Size = new Size(width, 30),
+            Location = new Point(margin, storage.Bottom + 14),
+            Width = ClientSize.Width - margin * 2,
+            Height = 34,
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
         };
         bottom.Controls.Add(_saveBtn);
