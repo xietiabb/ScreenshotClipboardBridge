@@ -34,6 +34,8 @@ public sealed class TrayContext : ApplicationContext
     private readonly ToolStripMenuItem _startupItem;
 
     private SettingsForm? _settingsForm;
+    private PathDialog? _pathDialog;
+    private System.Windows.Forms.Timer? _clickTimer; // 区分单击/双击的延迟判定
     private bool _processing;
 
     public TrayContext(
@@ -65,6 +67,9 @@ public sealed class TrayContext : ApplicationContext
         _pauseItem = new ToolStripMenuItem("暂停自动转换");
         _startupItem = new ToolStripMenuItem("开机自动启动");
 
+        // 置顶项：随时取回最近截图路径（对话框打开即自动复制，可直接 Ctrl+V）
+        menu.Items.Add("📋 最近截图路径…", null, (_, _) => ShowPathDialog());
+        menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(_enableItem);
         menu.Items.Add(_pauseItem);
         menu.Items.Add(new ToolStripSeparator());
@@ -76,7 +81,30 @@ public sealed class TrayContext : ApplicationContext
         menu.Items.Add("退出", null, (_, _) => ExitApplication());
 
         _tray.ContextMenuStrip = menu;
-        _tray.DoubleClick += (_, _) => OpenSettings();
+
+        // 左键单击 → 最近路径对话框；左键双击 → 设置。
+        // 单击比双击先触发，用系统双击时间作为延迟，双击时取消单击动作。
+        _clickTimer = new System.Windows.Forms.Timer { Interval = SystemInformation.DoubleClickTime + 50 };
+        _clickTimer.Tick += (_, _) =>
+        {
+            _clickTimer.Stop();
+            ShowPathDialog();
+        };
+        _tray.MouseClick += (_, e) =>
+        {
+            if (e.Button != MouseButtons.Left)
+            {
+                return;
+            }
+
+            _clickTimer.Stop();
+            _clickTimer.Start();
+        };
+        _tray.DoubleClick += (_, _) =>
+        {
+            _clickTimer.Stop();
+            OpenSettings();
+        };
 
         _enableItem.Click += (_, _) => SetEnabled(true);
         _pauseItem.Click += (_, _) => SetEnabled(false);
@@ -194,6 +222,21 @@ public sealed class TrayContext : ApplicationContext
         _tray.ShowBalloonTip(2000, "清理缓存", $"已删除 {deleted} 个截图。", ToolTipIcon.Info);
     }
 
+    /// <summary>打开「最近截图路径」对话框（单例：已打开则激活）。</summary>
+    private void ShowPathDialog()
+    {
+        if (_pathDialog is not null && !_pathDialog.IsDisposed)
+        {
+            _pathDialog.Activate();
+            return;
+        }
+
+        var dialog = new PathDialog(_handler.LastSavedPath, () => _store.OpenInExplorer());
+        dialog.FormClosed += (_, _) => _pathDialog = null;
+        _pathDialog = dialog;
+        dialog.Show();
+    }
+
     /// <summary>打开设置窗口（单例：已打开则激活）。</summary>
     private void OpenSettings()
     {
@@ -254,7 +297,9 @@ public sealed class TrayContext : ApplicationContext
         {
             _debounceTimer.Dispose();
             _pollTimer?.Dispose();
+            _clickTimer?.Dispose();
             _settingsForm?.Dispose();
+            _pathDialog?.Dispose();
         }
 
         base.Dispose(disposing);
