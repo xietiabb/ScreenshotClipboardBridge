@@ -14,7 +14,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$PngPath,
     [string]$OutIco = "src\ScreenshotClipboardBridge\assets\app.ico",
-    [int]$WhiteThreshold = 238   # 视为白色的 RGB 下限（238=较保守，只去纯白）
+    [int]$WhiteThreshold = 238,   # 视为白色的 RGB 下限（238=较保守，只去纯白）
+    [switch]$RemoveBeige          # 抠掉米色/浅黄底色（保留黑色图案与深色边框）
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,6 +56,7 @@ public static class IconHelper
         // C# 5 兼容（PowerShell 5.1 Add-Type 编译器），用 lambda 代替本地函数
         Func<int, bool> IsWhite = (idx) =>
         {
+            // 注意：Format32bppArgb 内存布局是 BGRA（B 在前）
             return bytes[idx] >= threshold
                 && bytes[idx + 1] >= threshold
                 && bytes[idx + 2] >= threshold;
@@ -136,6 +138,45 @@ public static class IconHelper
         maxY = Math.Min(h - 1, maxY + pad);
         return src.Clone(new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1), PixelFormat.Format32bppArgb);
     }
+
+    /// <summary>
+    /// 抠掉米色/浅黄底色（如 #F5E6D3 这类暖色底），只保留黑色图案与深色边框。
+    /// 判定：浅暖色（R≥225 且 G≥205 且 B≥175，且偏黄不偏红），与黑色图案/深色边框区分。
+    /// </summary>
+    public static Bitmap RemoveBeige(Bitmap src)
+    {
+        var bmp = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.DrawImage(src, 0, 0, src.Width, src.Height);
+        }
+
+        int w = bmp.Width, h = bmp.Height;
+        var rect = new Rectangle(0, 0, w, h);
+        var data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+        int stride = data.Stride;
+        var bytes = new byte[stride * h];
+        Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+
+        for (int p = 0; p < bytes.Length; p += 4)
+        {
+            // Format32bppArgb 内存布局是 BGRA：b=bytes[p], g=bytes[p+1], r=bytes[p+2]
+            int b = bytes[p], g = bytes[p + 1], r = bytes[p + 2];
+            // 浅暖色（米色/白色）判定。阈值覆盖复古磨损质感上的完整米色渐变：
+            // 黑色图案(30-60) 与深色边框(50-130) 的 RGB 远低于阈值，不会被误删。
+            bool beige = r >= 200 && g >= 180 && b >= 135
+                && (r - g) <= 70
+                && (g - b) <= 80;
+            if (beige)
+            {
+                bytes[p + 3] = 0; // 变透明
+            }
+        }
+
+        Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
+        bmp.UnlockBits(data);
+        return bmp;
+    }
 }
 "@ -ReferencedAssemblies System.Drawing
 
@@ -143,10 +184,16 @@ $root = Split-Path -Parent $PSScriptRoot
 $out = Join-Path $root $OutIco
 if (-not (Test-Path $PngPath)) { throw "找不到图片: $PngPath" }
 
-Write-Host "处理 $PngPath (阈值=$WhiteThreshold) ..."
+Write-Host "处理 $PngPath (阈值=$WhiteThreshold, 抠米色=$RemoveBeige) ..."
 $src = [System.Drawing.Image]::FromFile($PngPath)
 $clean = [IconHelper]::RemoveWhiteEdge((New-Object System.Drawing.Bitmap($src)), $WhiteThreshold)
 $src.Dispose()
+if ($RemoveBeige) {
+    # 抠掉米色底：只留黑色图案 + 深色边框
+    $tmp = [IconHelper]::RemoveBeige($clean)
+    $clean.Dispose()
+    $clean = $tmp
+}
 # 裁剪内容包围盒：去掉四周空白，主体占满画布
 $crop = [IconHelper]::CropToContent($clean)
 $clean.Dispose()
