@@ -43,87 +43,89 @@ public sealed class SettingsForm : Form
         MinimizeBox = false;
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        Padding = new Padding(12);
+        AutoSize = false;
+        ClientSize = new Size(500, 320);
 
         BuildLayout();
         LoadConfig(config);
     }
 
-    /// <summary>组装控件布局（TableLayoutPanel，两列）。</summary>
+    /// <summary>
+    /// 组装控件布局：固定窗口尺寸 + Dock 布局，行高用绝对值控制。
+    /// 不使用 AutoSize 容器嵌套（避免 WinForms 计算错误导致控件被遮挡）。
+    /// </summary>
     private void BuildLayout()
     {
         var root = new TableLayoutPanel
         {
-            ColumnCount = 2,
-            RowCount = 1,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 3,
             Dock = DockStyle.Fill,
+            Padding = new Padding(10),
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 112)); // General
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 148)); // Storage
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // 按钮行
 
         // ---- General 分组 ----
-        var general = new GroupBox { Text = "General", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+        var general = new GroupBox { Text = "General", Dock = DockStyle.Fill };
         var generalLayout = new TableLayoutPanel
         {
             ColumnCount = 1,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            RowCount = 3,
             Dock = DockStyle.Fill,
-            Padding = new Padding(6),
+            Padding = new Padding(10, 8, 10, 8),
         };
-        generalLayout.Controls.Add(_enabledCheck);
-        generalLayout.Controls.Add(_startupCheck);
-        generalLayout.Controls.Add(_notificationCheck);
+        generalLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        generalLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        generalLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        generalLayout.Controls.Add(_enabledCheck, 0, 0);
+        generalLayout.Controls.Add(_startupCheck, 0, 1);
+        generalLayout.Controls.Add(_notificationCheck, 0, 2);
         general.Controls.Add(generalLayout);
+        root.Controls.Add(general, 0, 0);
 
         // ---- Storage 分组 ----
-        var storage = new GroupBox { Text = "Storage", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+        var storage = new GroupBox { Text = "Storage", Dock = DockStyle.Fill };
         var storageLayout = new TableLayoutPanel
         {
             ColumnCount = 3,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            RowCount = 3,
             Dock = DockStyle.Fill,
-            Padding = new Padding(6),
+            Padding = new Padding(10, 8, 10, 8),
         };
         storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         storageLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        storageLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
 
-        storageLayout.Controls.Add(new Label { Text = "截图目录:", AutoSize = true }, 0, 0);
+        storageLayout.Controls.Add(new Label { Text = "截图目录:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 0);
+        _dirBox.Dock = DockStyle.Fill;
         storageLayout.Controls.Add(_dirBox, 1, 0);
+        _browseBtn.Anchor = AnchorStyles.Left | AnchorStyles.Right;
         storageLayout.Controls.Add(_browseBtn, 2, 0);
 
-        storageLayout.Controls.Add(new Label { Text = "保存时间:", AutoSize = true }, 0, 1);
+        storageLayout.Controls.Add(new Label { Text = "保存时间:", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 1);
+        _retentionBox.Dock = DockStyle.Fill;
         storageLayout.Controls.Add(_retentionBox, 1, 1);
 
+        _openDirBtn.Anchor = AnchorStyles.Left;
         storageLayout.Controls.Add(_openDirBtn, 1, 2);
         storageLayout.SetColumnSpan(_openDirBtn, 2);
-
         storage.Controls.Add(storageLayout);
+        root.Controls.Add(storage, 0, 1);
 
-        // ---- 按钮行 ----
+        // ---- 按钮行（右下角）----
         var buttonRow = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Dock = DockStyle.Fill,
+            Padding = new Padding(0, 12, 0, 0),
         };
         buttonRow.Controls.Add(_saveBtn);
         buttonRow.Controls.Add(_cancelBtn);
-
-        // ---- 根布局 ----
-        root.RowCount = 3;
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.Controls.Add(general, 0, 0);
-        root.Controls.Add(storage, 0, 1);
         root.Controls.Add(buttonRow, 0, 2);
 
         Controls.Add(root);

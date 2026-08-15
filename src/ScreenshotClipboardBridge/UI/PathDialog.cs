@@ -7,17 +7,23 @@ namespace ScreenshotClipboardBridge.UI;
 /// 用途：随时取回最近一次截图保存的文件路径。
 /// 打开时若已有路径，自动复制到剪贴板 → 用户直接 Ctrl+V 粘贴即可。
 /// 提供：复制路径 / 打开文件夹 / 关闭。
+///
+/// 布局说明：固定尺寸 + 手动坐标（不叠加 AutoSize），
+/// 避免 WinForms 中 AutoSize 与 ClientSize 混用导致的控件被遮挡问题。
 /// </summary>
 public sealed class PathDialog : Form
 {
+    private const int DialogWidth = 560;
+    private const int Margin = 16;
+
     private readonly string? _path;
     private readonly Action _openFolder;
 
-    private readonly TextBox _pathBox = new() { ReadOnly = true };
-    private readonly Button _copyBtn = new() { Text = "复制路径" };
-    private readonly Button _openBtn = new() { Text = "打开文件夹" };
-    private readonly Button _closeBtn = new() { Text = "关闭" };
-    private readonly Label _hintLabel = new() { AutoSize = true };
+    private readonly TextBox _pathBox;
+    private readonly Button _copyBtn;
+    private readonly Button _openBtn;
+    private readonly Button _closeBtn;
+    private readonly Label _hintLabel;
 
     public PathDialog(string? path, Action openFolder)
     {
@@ -31,70 +37,62 @@ public sealed class PathDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.CenterScreen;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        Padding = new Padding(12);
-        ClientSize = new Size(520, 0);
+        AutoSize = false;
+        ClientSize = new Size(DialogWidth, 152);
 
-        BuildLayout();
-        LoadPath();
-    }
+        int contentWidth = DialogWidth - Margin * 2; // 内容区可用宽度
 
-    private void BuildLayout()
-    {
-        var root = new TableLayoutPanel
+        // ---- 第 1 行：提示文字 ----
+        _hintLabel = new Label { AutoSize = true, Location = new Point(Margin, 14) };
+
+        // ---- 第 2 行：路径文本框（只读、可全选手动复制）----
+        _pathBox = new TextBox
         {
-            ColumnCount = 1,
-            RowCount = 4,
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            Padding = new Padding(4),
+            ReadOnly = true,
+            Location = new Point(Margin, 44),
+            Width = contentWidth,
+            Height = 26,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
         };
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-        // 第 1 行：提示
-        _hintLabel.Text = _path is null ? "还没有转换过截图" : "已自动复制到剪贴板，可直接 Ctrl+V 粘贴 ✔";
-        root.Controls.Add(_hintLabel, 0, 0);
-
-        // 第 2 行：路径文本框（只读、可全选手动复制）
-        _pathBox.Width = 480;
-        _pathBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        root.Controls.Add(_pathBox, 0, 1);
-
-        // 第 3 行：按钮
+        // ---- 第 3 行：按钮（右下角，从右往左排列）----
+        _copyBtn = new Button { Text = "复制路径", Width = 92, Height = 28 };
+        _openBtn = new Button { Text = "打开文件夹", Width = 100, Height = 28 };
+        _closeBtn = new Button { Text = "关闭", Width = 76, Height = 28 };
         var buttons = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            Dock = DockStyle.Fill,
+            Location = new Point(Margin, 100),
+            Size = new Size(contentWidth, 34),
+            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
         };
         buttons.Controls.Add(_closeBtn);
         buttons.Controls.Add(_openBtn);
         buttons.Controls.Add(_copyBtn);
-        root.Controls.Add(buttons, 0, 2);
 
-        Controls.Add(root);
+        Controls.Add(_hintLabel);
+        Controls.Add(_pathBox);
+        Controls.Add(buttons);
 
         _copyBtn.Click += (_, _) => CopyPath();
         _openBtn.Click += (_, _) => _openFolder();
         _closeBtn.Click += (_, _) => Close();
+
+        LoadPath();
     }
 
     private void LoadPath()
     {
         if (_path is null)
         {
+            _hintLabel.Text = "还没有转换过截图";
             _pathBox.Text = "（暂无记录）";
             _copyBtn.Enabled = false;
             _openBtn.Enabled = false;
             return;
         }
 
+        _hintLabel.Text = "已自动复制到剪贴板，可直接 Ctrl+V 粘贴 ✔";
         _pathBox.Text = _path;
         _pathBox.SelectAll();
         _pathBox.Focus();
