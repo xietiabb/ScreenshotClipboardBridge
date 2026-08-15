@@ -24,6 +24,7 @@ public sealed class PathDialog : Form
     private readonly Button _openBtn;
     private readonly Button _closeBtn;
     private readonly Label _hintLabel;
+    private readonly ToolTip _tooltip = new();
 
     public PathDialog(string? path, Action openFolder)
     {
@@ -75,11 +76,24 @@ public sealed class PathDialog : Form
         Controls.Add(_pathBox);
         Controls.Add(buttons);
 
+        // 路径较长显示不全时，鼠标悬停查看完整路径。
+        _pathBox.TextChanged += (_, _) => _tooltip.SetToolTip(_pathBox, _pathBox.Text);
+
         _copyBtn.Click += (_, _) => CopyPath();
         _openBtn.Click += (_, _) => _openFolder();
         _closeBtn.Click += (_, _) => Close();
 
         LoadPath();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tooltip.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 
     private void LoadPath()

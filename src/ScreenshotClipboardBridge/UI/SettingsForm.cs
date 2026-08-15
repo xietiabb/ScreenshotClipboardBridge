@@ -24,6 +24,7 @@ public sealed class SettingsForm : Form
     private readonly Button _cancelBtn = new() { Text = "取消", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, DialogResult = DialogResult.Cancel };
 
     private readonly ScreenshotStore _store;
+    private readonly ToolTip _tooltip = new();
 
     /// <summary>用户点「保存」后产生的新配置；取消则为 null。</summary>
     public Config? Result { get; private set; }
@@ -48,7 +49,7 @@ public sealed class SettingsForm : Form
         AutoSize = false;
         ClientSize = new Size(600, 430);
 
-        BuildLayout();
+        BuildLayout();          // 内部会按内容动态设定窗口尺寸
         LoadConfig(config);
     }
 
@@ -130,11 +131,11 @@ public sealed class SettingsForm : Form
         storage.Controls.Add(storageLayout);
         Controls.Add(storage);
 
-        // ---- 底部按钮（右下角，FlowLayoutPanel 动态布局 AutoSize 按钮）----
+        // ---- 底部按钮：固定贴住窗口底部边线（不依赖 Storage 的 AutoSize 布局时机）----
         var bottom = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.RightToLeft,
-            Location = new Point(margin, storage.Bottom + 2),
+            Location = new Point(margin, ClientSize.Height - 34 - 8),
             Width = ClientSize.Width - margin * 2,
             Height = 34,
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
@@ -142,6 +143,9 @@ public sealed class SettingsForm : Form
         bottom.Controls.Add(_saveBtn);
         bottom.Controls.Add(_cancelBtn);
         Controls.Add(bottom);
+
+        // ---- 路径 ToolTip：目录较长显示不全时，鼠标悬停查看完整路径 ----
+        _dirBox.TextChanged += (_, _) => _tooltip.SetToolTip(_dirBox, _dirBox.Text);
 
         // 事件
         _browseBtn.Click += OnBrowseClick;
@@ -218,6 +222,16 @@ public sealed class SettingsForm : Form
         Saved?.Invoke(this, Result);
         DialogResult = DialogResult.OK;
         Close();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tooltip.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 
     /// <summary>下拉框项：保留天数 + 显示文本。</summary>

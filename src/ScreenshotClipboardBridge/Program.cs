@@ -115,6 +115,7 @@ internal static class Program
             AppLog.Write("preview", $"布局预览已保存到 {outputDir}");
             settings.Close();
             pathDialog.Close();
+            Application.Exit(); // 预览进程必须主动退出，避免锁住可执行文件
         }
         catch (Exception ex)
         {
