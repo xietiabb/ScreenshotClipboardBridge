@@ -12,7 +12,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-brightgreen)](https://www.microsoft.com/windows)
 [![UI](https://img.shields.io/badge/UI-WinForms-8A2BE2)](https://learn.microsoft.com/dotnet/desktop/winforms/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/yourname/ScreenshotClipboardBridge/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/xietiabb/ScreenshotClipboardBridge/pulls)
 
 ---
 
