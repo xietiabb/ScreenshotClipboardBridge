@@ -4,7 +4,15 @@
 >
 > 截图 → 自动保存 PNG → 路径进剪贴板 → `Ctrl+V` 直接粘贴路径 → 视觉 MCP 按路径读图分析。
 
-[![.NET](https://img.shields.io/badge/.NET-8.0-blue)](https://dotnet.microsoft.com/) [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-brightgreen)](https://www.microsoft.com/windows) [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+<p align="center">
+  <img src="docs/screenshots/workflow.png" alt="一键工作流" width="90%">
+</p>
+
+[![.NET](https://img.shields.io/badge/.NET-8.0-blue)](https://dotnet.microsoft.com/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-brightgreen)](https://www.microsoft.com/windows)
+[![UI](https://img.shields.io/badge/UI-WinForms-8A2BE2)](https://learn.microsoft.com/dotnet/desktop/winforms/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/yourname/ScreenshotClipboardBridge/pulls)
 
 ---
 
@@ -14,8 +22,6 @@
 但你已经配置了视觉 MCP Server（GLM-4.6V-Flash），它**可以根据本地图片文件路径读取图片**。
 
 这个工具就是中间的桥梁：**监听剪贴板 → 截图自动落盘 → 把完整路径写回剪贴板**。
-
-完整操作流程（截图后零额外操作）：
 
 ```
 1. 按 Win + Shift + S 框选截图
@@ -34,11 +40,20 @@
 | 🛡️ 防死循环 | 程序自写路径会被识别跳过，绝不循环处理（详见 [架构文档](docs/ARCHITECTURE.md)） |
 | ⏱️ 防抖去重 | 300ms 防抖，截图工具多次更新剪贴板也只保存一次 |
 | 🚫 只处理图片 | 普通文本 / 代码 / 文件复制一律原样放行，绝不劫持 |
-| 🧠 系统托盘 | 常驻后台，无主窗口；菜单：启用/暂停/打开目录/设置/开机自启/清理缓存/退出 |
+| 🧠 系统托盘 | 常驻后台，无主窗口；左键单击取最近路径、双击开设置 |
 | ⚙️ 设置窗口 | 自动转换、开机启动、通知开关；截图目录、保存时间（1/3/7/30天/永久） |
 | 🔔 系统通知 | 转换成功弹 Windows Toast（Win10/11），可关闭 |
 | 🧹 缓存清理 | 只删本程序创建的截图（文件名白名单），**绝不碰用户其他文件** |
+| 🔁 重启记忆 | 最近截图记录持久化，程序重启后仍可一键取回 |
 | ⚡ 极轻量 | C# + .NET 8 + WinForms，无 Electron、无浏览器运行时，内存占用极低 |
+
+## 🖥️ 界面一览
+
+| 设置窗口 | 最近截图路径 |
+| --- | --- |
+| ![设置窗口](docs/screenshots/settings-window.png) | ![最近截图路径](docs/screenshots/path-dialog.png) |
+
+> 托盘图标**左键单击**弹出「最近截图路径」对话框，路径已自动复制，直接 `Ctrl+V` 粘贴。
 
 ## 🚀 快速开始
 
@@ -59,27 +74,19 @@ dotnet restore ScreenshotClipboardBridge.sln
 dotnet build   ScreenshotClipboardBridge.sln -c Release
 
 # 2. 发布 EXE
-powershell -File scripts\build.ps1                # 框架依赖版（~24MB，需 .NET 8 Desktop Runtime）
-powershell -File scripts\build.ps1 -SelfContained # 自包含版（~74MB，免装运行时）
+powershell -File scripts\build.ps1                # 框架依赖版（~25MB，需 .NET 8 Desktop Runtime）
+powershell -File scripts\build.ps1 -SelfContained # 自包含版（~75MB，免装运行时）
 ```
 
 > 📦 产物输出到 `dist\framework-dependent\` 与 `dist\self-contained\`。
-
-### 离线 / 受限网络环境构建
-
-本仓库的 `nuget.config` 同时启用**本地源**（`tools/nuget-local`）与官方源。
-若机器无法直连 nuget.org（例如 schannel 损坏、需代理），可先用 Node.js 引导下载全部依赖包：
-
-```powershell
-node scripts\fetch-nuget.mjs        # 把全部 NuGet 包下载到 tools\nuget-local
-node scripts\download-dotnet-sdk.mjs # 可选：引导安装用户级 .NET 8 SDK（无管理员权限）
-```
+> 首次发布会从 NuGet 还原依赖；离线受限网络可先运行 `node scripts\fetch-nuget.mjs` 下载本地包源（见 `nuget.config` 注释）。
 
 ## 🧭 使用说明
 
 ### 系统托盘（右键菜单）
 
-- **启用自动转换 / 暂停自动转换** —— 总开关（二选一，互斥显示）
+- **📋 最近截图路径…** —— 打开路径对话框（路径已自动复制，可直接粘贴）
+- **启用自动转换 / 暂停自动转换** —— 总开关（互斥显示）
 - **打开截图保存目录** —— 资源管理器打开当前截图目录
 - **设置** —— 打开设置窗口（托盘图标双击也可打开）
 - **开机自动启动** —— 写注册表 `HKCU\...\Run`，无需管理员
@@ -91,7 +98,7 @@ node scripts\download-dotnet-sdk.mjs # 可选：引导安装用户级 .NET 8 SDK
 | 分组 | 选项 |
 | --- | --- |
 | General | 自动转换截图 / 开机自动启动 / 转换成功通知 |
-| Storage | 截图目录（路径 + 选择目录按钮）、保存时间（1/3/7/30 天、永久保存）、打开截图文件夹 |
+| Storage | 截图目录（路径 + 选择目录按钮，悬停可看完整路径）、保存时间（1/3/7/30 天、永久保存）、打开截图文件夹 |
 
 ## ⚙️ 配置文件
 
@@ -103,15 +110,16 @@ node scripts\download-dotnet-sdk.mjs # 可选：引导安装用户级 .NET 8 SDK
 
 ```json
 {
-  "enabled": true,           // 自动转换总开关
-  "saveDirectory": "default",// "default"=默认目录，或自定义绝对路径
-  "retentionDays": 7,        // 0=永久, 1, 3, 7, 30
-  "notification": true,      // 转换成功通知
-  "startup": false           // 开机自启（以注册表为准）
+  "enabled": true,            // 自动转换总开关
+  "saveDirectory": "default", // "default"=默认目录，或自定义绝对路径
+  "retentionDays": 7,         // 0=永久, 1, 3, 7, 30
+  "notification": true,       // 转换成功通知
+  "startup": false            // 开机自启（以注册表为准）
 }
 ```
 
 截图默认保存目录：`%LOCALAPPDATA%\ScreenshotClipboardBridge\images\`
+最近截图记录：`%LOCALAPPDATA%\ScreenshotClipboardBridge\last-screenshot.json`
 
 ## 🗂️ 项目结构
 
@@ -121,25 +129,28 @@ Screenshot Clipboard Bridge/
 │   ├── App/                           # 应用级：路径常量、日志
 │   ├── Clipboard/                     # 剪贴板监听、快照、图片处理管线
 │   ├── Core/                          # 存储、文件名、防循环守卫
-│   ├── Services/                      # 配置、开机自启、缓存清理、Toast 通知
+│   ├── Services/                      # 配置、开机自启、缓存清理、Toast 通知、最近记录
 │   ├── Native/                        # P/Invoke 与 COM 互操作
-│   └── UI/                            # 托盘上下文、设置窗口、图标
-├── tests/ScreenshotClipboardBridge.Tests/  # xUnit 单元测试（32 个）
-├── scripts/                           # build.ps1 / smoke-test.ps1 / 离线引导脚本
-├── docs/ARCHITECTURE.md               # 架构设计与关键决策
+│   ├── UI/                            # 托盘上下文、设置窗口、路径对话框、图标
+│   └── assets/                        # 应用图标（scripts/make-icon.ps1 生成）
+├── tests/ScreenshotClipboardBridge.Tests/  # xUnit 单元测试（36 个）
+├── scripts/                           # build / smoke-test / make-icon / 离线引导脚本
+├── docs/                              # 架构文档 + 界面截图
 └── nuget.config                       # 双源配置（本地离线源 + nuget.org）
 ```
 
 ## ✅ 测试
 
-### 单元测试（32 个，全部通过）
+### 单元测试（36 个）
+
+覆盖：处理管线（只处理图片/防循环/连续截图）、文件名规则、存储清理安全、配置持久化、最近记录持久化、时间窗口守卫。
 
 ```powershell
 dotnet build  ScreenshotClipboardBridge.sln
-dotnet test   ScreenshotClipboardBridge.sln   # 或：node 环境受限时用 scripts 里说明的 xunit 控制台方式
+dotnet test   ScreenshotClipboardBridge.sln
 ```
 
-### 端到端冒烟测试（11 项，全部通过）
+### 端到端冒烟测试（11 项）
 
 模拟验收标准的全部场景，自动启动程序并操作真实剪贴板：
 
@@ -156,20 +167,26 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\smoke-test.ps1 -
 | Test 5 | 复制文件（含图片格式+文件列表） | 完全不处理，文件列表原样保留 |
 | Test 6 | 程序自写路径 | 无死循环，剪贴板稳定，进程存活 |
 
-## 🔮 第二阶段规划（MCP 扩展预留）
+## ❓ FAQ
 
-第一版保持「截图 → 路径」的纯粹定位，但架构已为未来预留：
+**Q：截图后去 DPH 粘贴，出来的不是路径？**
+程序必须正在运行（托盘有图标）。左键单击托盘图标 → 打开「最近截图路径」对话框验证：显示路径=程序正常（问题在粘贴端）；显示"暂无记录"=截图时程序没运行。
 
-- `ClipboardImageHandler` 暴露 `LastSavedPath` / `LastSavedAtUtc`；
-- `ScreenshotStore` 是独立的存储抽象，可直接扩展为「按时间查询」仓库；
-- 未来的 `get_latest_screenshot` / `read_latest_screenshot` 可基于同一存储层实现：
+**Q：托盘图标不见了？**
+Win11 托盘图标可能收在 `^` 展开箭头里。也可在「设置 → 个性化 → 任务栏 → 系统托盘图标」中固定。
 
-```json
-// 未来 MCP 返回示例（Phase 2）
-{ "path": "C:\\Users\\...\\2026-08-15_12-45-33_a82f31.png", "createdAt": "2026-08-15T12:45:33" }
-```
+**Q：会误伤我复制的文本/文件吗？**
+不会。处理管线只在「剪贴板含图片 且 不含文本 且 不含文件列表」时才执行，普通复制完全放行（冒烟测试 Test 3/4/5 验证）。
 
-详见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#-mcp-扩展预留phase-2)。
+**Q：截图的保存时间怎么改？**
+托盘右键 → 设置 → Storage → 保存时间（1/3/7/30 天 / 永久）。清理只删本程序创建的文件。
+
+## 🔮 路线图
+
+- [x] **v1.0** 截图 → 保存 → 路径写回剪贴板（当前版本）
+- [ ] **v1.1** 截图历史浏览窗口、批量管理
+- [ ] **v2.0** MCP 扩展：`get_latest_screenshot` / `read_latest_screenshot`，AI 免粘贴直接读图
+- [ ] **v2.1** 跨设备同步、团队截图归档
 
 ## 📄 许可
 
