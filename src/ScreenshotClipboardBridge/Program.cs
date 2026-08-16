@@ -90,14 +90,15 @@ internal static class Program
         try
         {
             Directory.CreateDirectory(outputDir);
-            var config = new Config();
-            var store = new Core.ScreenshotStore(() => AppPaths.DefaultImageDir);
+
+            // 预览模式使用示例路径（不泄露真实用户名），仅用于截图渲染。
+            const string samplePath = @"C:\Users\YourName\AppData\Local\ScreenshotClipboardBridge\images\2026-08-15_12-45-33_a82f31.png";
+            var config = new Config { SaveDirectory = @"C:\Users\YourName\AppData\Local\ScreenshotClipboardBridge\images" };
+            var store = new Core.ScreenshotStore(() => config.SaveDirectory);
 
             var settings = new UI.SettingsForm(config, store);
             settings.Show();
-            var pathDialog = new UI.PathDialog(
-                @"C:\Users\tian51\AppData\Local\ScreenshotClipboardBridge\images\2026-08-15_15-20-28_48eb44.png",
-                () => { });
+            var pathDialog = new UI.PathDialog(samplePath, () => { });
             pathDialog.Show();
 
             // 让窗口完成一次真实布局渲染
