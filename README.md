@@ -8,6 +8,15 @@
   <img src="docs/screenshots/workflow.png" alt="一键工作流" width="90%">
 </p>
 
+<p align="center">
+  <a href="https://github.com/xietiabb/ScreenshotClipboardBridge/releases/download/v1.0.0/ScreenshotClipboardBridge.exe">
+    <img src="https://img.shields.io/badge/⬇%20Download%20EXE%20(免装.NET)-v1.0.0-0078D7?style=for-the-badge&logo=windows" alt="直接下载 EXE">
+  </a>
+  <a href="https://github.com/xietiabb/ScreenshotClipboardBridge/releases">
+    <img src="https://img.shields.io/badge/Releases-全部版本-2ea44f?style=for-the-badge" alt="Releases">
+  </a>
+</p>
+
 [![.NET](https://img.shields.io/badge/.NET-8.0-blue)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-brightgreen)](https://www.microsoft.com/windows)
 [![UI](https://img.shields.io/badge/UI-WinForms-8A2BE2)](https://learn.microsoft.com/dotnet/desktop/winforms/)
@@ -57,12 +66,17 @@
 
 ## 🚀 快速开始
 
-### 方式一：直接运行（推荐）
+### 方式一：直接下载 EXE（推荐）
 
-1. 从 [Releases](../../releases) 下载 `ScreenshotClipboardBridge-win-x64.zip`（自包含版，无需安装 .NET）。
-2. 解压，双击 `ScreenshotClipboardBridge.exe`。
-3. 系统托盘出现图标即已常驻。
-4. `Win + Shift + S` 截图 → 去 DPH `Ctrl + V` → 粘贴的就是图片绝对路径。
+点击上方 **「⬇ Download EXE」** 按钮，或直接下载：
+
+- [⬇️ ScreenshotClipboardBridge.exe（自包含，免装 .NET，点开即用）](https://github.com/xietiabb/ScreenshotClipboardBridge/releases/download/v1.0.0/ScreenshotClipboardBridge.exe)
+- [⬇️ ScreenshotClipboardBridge-win-x64.zip（同 exe 的 zip 打包）](https://github.com/xietiabb/ScreenshotClipboardBridge/releases/download/v1.0.0/ScreenshotClipboardBridge-win-x64.zip)
+
+下载后：
+1. 双击 `ScreenshotClipboardBridge.exe`（zip 版需先解压）。
+2. 系统托盘出现图标即已常驻。
+3. `Win + Shift + S` 截图 → 去 DPH `Ctrl + V` → 粘贴的就是图片绝对路径。
 
 > 💡 想开机自启？托盘右键 →「开机自动启动」。
 
