@@ -5,7 +5,7 @@
 > 截图 → 自动保存 PNG → 路径进剪贴板 → `Ctrl+V` 直接粘贴路径 → 视觉 MCP 按路径读图分析。
 
 <p align="center">
-  <img src="docs/screenshots/workflow.png" alt="一键工作流" width="90%">
+  <img src="https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/docs/screenshots/workflow.png" alt="一键工作流" width="90%">
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 [![.NET](https://img.shields.io/badge/.NET-8.0-blue)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-brightgreen)](https://www.microsoft.com/windows)
 [![UI](https://img.shields.io/badge/UI-WinForms-8A2BE2)](https://learn.microsoft.com/dotnet/desktop/winforms/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](https://github.com/xietiabb/ScreenshotClipboardBridge/pulls)
 
 ---
@@ -46,7 +46,7 @@
 | 功能 | 说明 |
 | --- | --- |
 | 🖼️ 截图自动转换 | 检测到剪贴板图片 → 保存 PNG → 路径写回，**零操作** |
-| 🛡️ 防死循环 | 程序自写路径会被识别跳过，绝不循环处理（详见 [架构文档](docs/ARCHITECTURE.md)） |
+| 🛡️ 防死循环 | 程序自写路径会被识别跳过，绝不循环处理（详见 [架构文档](https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/docs/ARCHITECTURE.md)） |
 | ⏱️ 防抖去重 | 300ms 防抖，截图工具多次更新剪贴板也只保存一次 |
 | 🚫 只处理图片 | 普通文本 / 代码 / 文件复制一律原样放行，绝不劫持 |
 | 🧠 系统托盘 | 常驻后台，无主窗口；左键单击取最近路径、双击开设置 |
@@ -60,7 +60,7 @@
 
 | 设置窗口 | 最近截图路径 |
 | --- | --- |
-| ![设置窗口](docs/screenshots/settings-window.png) | ![最近截图路径](docs/screenshots/path-dialog.png) |
+| ![设置窗口](https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/docs/screenshots/settings-window.png) | ![最近截图路径](https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/docs/screenshots/path-dialog.png) |
 
 > 托盘图标**左键单击**弹出「最近截图路径」对话框，路径已自动复制，直接 `Ctrl+V` 粘贴。
 
@@ -204,7 +204,7 @@ Win11 托盘图标可能收在 `^` 展开箭头里。也可在「设置 → 个�
 
 ## 📄 许可
 
-[MIT](LICENSE)
+[MIT](https://github.com/xietiabb/ScreenshotClipboardBridge/blob/master/LICENSE)
 
 ---
 
